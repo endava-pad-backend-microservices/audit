@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Rewrite;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Swashbuckle.AspNetCore.Swagger;
@@ -34,6 +35,10 @@ namespace Audit
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            var rewriteOpts = new RewriteOptions()
+                .AddRedirect("v2/api-docs", "swagger/v1/swagger.json");
+            app.UseRewriter(rewriteOpts);
 
             app.UseSwagger();
             app.UseSwaggerUI(options =>
