@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Rewrite;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Steeltoe.Discovery.Client;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace Audit
@@ -26,6 +27,8 @@ namespace Audit
             {
                 c.SwaggerDoc("v1", new Info { Title = "Audit API", Version = "v1" });
             });
+
+            services.AddDiscoveryClient(Configuration);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -46,6 +49,8 @@ namespace Audit
                 options.SwaggerEndpoint("/swagger/v1/swagger.json", "Audit API V1");
                 options.RoutePrefix = string.Empty;
             });
+
+            app.UseDiscoveryClient();
 
             app.UseMvc();
         }
