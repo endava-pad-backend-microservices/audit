@@ -36,8 +36,9 @@ namespace Audit.Repository
                     return true;
                 }
                 return false;
-            }catch(Exception e)
+            }catch(CouchDB.Driver.Exceptions.CouchException e)
             {
+                System.Console.WriteLine(e.Message);
                 return false;
             }
         }
