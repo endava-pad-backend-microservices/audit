@@ -22,7 +22,7 @@ namespace Audit
             while (!isConnectionUp)
             {
                 isConnectionUp = conn.IsUp();
-            };
+            }
 
             new Repository.Connection().GetConnection().CreateDatabaseAsync<Entity.Audit>();
         }
