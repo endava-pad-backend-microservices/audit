@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Rewrite;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Steeltoe.Discovery.Client;
 using Swashbuckle.AspNetCore.Swagger;
 using System.Collections.Generic;
@@ -12,28 +13,29 @@ namespace Audit
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IHostingEnvironment env)
         {
-            Configuration = configuration;
-            StaticConfig = configuration;
-            var conn = new Repository.Connection();
-
-            bool isConnectionUp = false;
-            while (!isConnectionUp)
-            {
-                isConnectionUp = conn.IsUp();
-            }
-
-            new Repository.Connection().GetConnection().CreateDatabaseAsync<Entity.Audit>();
+            var builder = new ConfigurationBuilder().SetBasePath(env.ContentRootPath).
+                AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
+                .AddEnvironmentVariables();
+            Configuration = builder.Build();
+            StaticConfig = Configuration;
         }
 
-        public IConfiguration Configuration { get; }
         public static IConfiguration StaticConfig { get; private set; }
+        public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services)
+        public void ConfigureServices(IServiceCollection services) 
         {
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);                 
+            services.Configure<Utils.EnvironmentConfig>(Configuration);
+            if (Configuration["EUREKA_URL"] != null && Configuration["SERVER_URL"] != null)
+            {
+                Configuration["eureka:client:serviceUrl"] = Configuration["EUREKA_URL"];
+                Configuration["eureka:instance:hostName"] = Configuration["SERVER_URL"];
+            }
             services.AddDiscoveryClient(Configuration);
             // Register the Swagger generator, defining 1 Swagger documents
             services.AddSwaggerGen(c =>
@@ -45,7 +47,7 @@ namespace Audit
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        static public void Configure(IApplicationBuilder app, IHostingEnvironment env, IOptions<Utils.EnvironmentConfig> envConfig)
         {
             if (env.IsDevelopment())
             {
@@ -55,7 +57,11 @@ namespace Audit
             var rewriteOpts = new RewriteOptions()
                 .AddRedirect("v2/api-docs", "api/audit/swagger/v1/swagger.json");
             app.UseRewriter(rewriteOpts);
-            var basepath = Configuration["spring:path"];
+            var basepath = "/";
+            if (envConfig.Value.SWAGGER_PATH != null)
+            {
+                basepath = envConfig.Value.SWAGGER_PATH;
+            }
 
 
             // Enable middleware to serve generated Swagger as a JSON endpoint.
@@ -66,7 +72,6 @@ namespace Audit
                 {
                     IDictionary<string, PathItem> paths = new Dictionary<string, PathItem>();
                     foreach (var path in swaggerDoc.Paths)
-
                     {
                         paths.Add(path.Key.Replace(basepath, "/"), path.Value);
                     }
@@ -85,6 +90,15 @@ namespace Audit
             app.UseDiscoveryClient();
 
             app.UseMvc();
+
+            var repo = new Audit.Repository.AuditRepository(envConfig);
+            var isUp = false;
+            while (!isUp)
+            {
+                isUp = repo.IsUp().Result;
+            }
+            repo.CreateDd();
+
         }
     }
 }

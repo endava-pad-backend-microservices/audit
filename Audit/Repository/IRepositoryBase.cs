@@ -9,8 +9,10 @@ namespace Audit.Repository
     {
         Task<List<T>> FindAll();
         Task<T> FindById(string id,bool closeConnection);
-        Task<bool> Create(T entity);
-        Task<bool> Update(T entity);
+        Task<T> Create(T entity);
+        Task<T> Update(T entity);
         Task<bool> Delete(T entity);
+        Task<bool> CreateDd();
+        Task<bool> IsUp();
     }
 }
