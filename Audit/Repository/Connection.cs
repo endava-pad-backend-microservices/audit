@@ -43,7 +43,7 @@ namespace Audit.Repository
             }
         }
 
-        public void Dispose()
+        public void DisposeConnection()
         {
             this.ConnectionDB.Dispose();
         }

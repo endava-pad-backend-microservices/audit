@@ -18,7 +18,9 @@ namespace Audit
             StaticConfig = configuration;
             var conn = new Repository.Connection();
             while (!conn.IsUp())
-            { };
+            {
+                System.Console.WriteLine("Connection fail! Re-attempt in progress");
+            };
 
             new Repository.Connection().GetConnection().CreateDatabaseAsync<Entity.Audit>();
         }
