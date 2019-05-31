@@ -44,6 +44,8 @@ namespace Audit
 
             });
             services.AddRouting(options => options.LowercaseUrls = true);
+
+            services.AddDiscoveryClient(Configuration);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -87,6 +89,8 @@ namespace Audit
                 //Serve swagger UI as the app's root
                 options.RoutePrefix = string.Empty;
             });
+            app.UseDiscoveryClient();
+
             app.UseDiscoveryClient();
 
             app.UseMvc();
