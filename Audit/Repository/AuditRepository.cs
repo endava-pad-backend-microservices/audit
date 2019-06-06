@@ -47,15 +47,13 @@ namespace Audit.Repository
         }
         public async Task<Entity.Audit> Create(Entity.Audit doc)
         {
-            doc = this.Filter(doc);
-            var result = await ConnectionDB.GetDatabase<Entity.Audit>().CreateAsync(doc).ConfigureAwait(true);
+            var result = await ConnectionDB.GetDatabase<Entity.Audit>().CreateAsync(Filter(doc)).ConfigureAwait(true);
             ConnectionDB.Dispose();
             return result;
         }
         public async Task<Entity.Audit> Update(Entity.Audit doc)
         {
-            doc = this.Filter(doc);
-            var result = await ConnectionDB.GetDatabase<Entity.Audit>().CreateOrUpdateAsync(doc).ConfigureAwait(true);
+            var result = await ConnectionDB.GetDatabase<Entity.Audit>().CreateOrUpdateAsync(Filter(doc)).ConfigureAwait(true);
             ConnectionDB.Dispose();
             return result;
         }
@@ -67,7 +65,7 @@ namespace Audit.Repository
             return true;
         }
 
-        private Entity.Audit Filter(Entity.Audit doc)
+        static private Entity.Audit Filter(Entity.Audit doc)
         {
             doc.Body = Entity.Audit.FilterBody(doc.Body);
             doc.Response = Entity.Audit.FilterBody(doc.Response);
