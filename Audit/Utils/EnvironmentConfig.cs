@@ -16,5 +16,6 @@ namespace Audit.Utils
         public string DOCKERIZE_VERSION { get; set; }
         public string ASPNETCORE_URLS { get; set; }
         public string SWAGGER_PATH { get; set; }
+        public string GATEWAY_URL { get; set; }
     }
 }

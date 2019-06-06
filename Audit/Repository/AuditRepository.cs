@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Audit.Entity;
 using Audit.Utils;
 using CouchDB.Driver;
 using Microsoft.Extensions.Options;
+using RestSharp;
 
 namespace Audit.Repository
 {
@@ -47,13 +47,16 @@ namespace Audit.Repository
         }
         public async Task<Entity.Audit> Create(Entity.Audit doc)
         {
-
+            doc.Body = Entity.Audit.FilterBody(doc.Body);
+            doc.Response = Entity.Audit.FilterBody(doc.Response);
             var result = await ConnectionDB.GetDatabase<Entity.Audit>().CreateAsync(doc).ConfigureAwait(true);
             ConnectionDB.Dispose();
             return result;
         }
         public async Task<Entity.Audit> Update(Entity.Audit doc)
         {
+            doc.Body = Entity.Audit.FilterBody(doc.Body);
+            doc.Response = Entity.Audit.FilterBody(doc.Response);
             var result = await ConnectionDB.GetDatabase<Entity.Audit>().CreateOrUpdateAsync(doc).ConfigureAwait(true);
             ConnectionDB.Dispose();
             return result;
@@ -68,8 +71,14 @@ namespace Audit.Repository
 
         public async Task<bool> CreateDd()
         {
-            await ConnectionDB.CreateDatabaseAsync<Entity.Audit>().ConfigureAwait(true);
-            return true;
+            try
+            {
+                await ConnectionDB.CreateDatabaseAsync<Entity.Audit>().ConfigureAwait(true);
+                return true;
+            }catch
+            {
+                return false;
+            }
         }
 
         public async Task<bool> IsUp()
@@ -81,7 +90,7 @@ namespace Audit.Repository
                     return true;
                 }
                 return false;
-            }catch(CouchDB.Driver.Exceptions.CouchException e)
+            }catch
             {
                 return false;
             }

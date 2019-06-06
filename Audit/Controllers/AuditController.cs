@@ -27,6 +27,13 @@ namespace Audit.Controllers
         {
             return new JsonResult(await _repository.FindAll().ConfigureAwait(true));
         }
+        // GET: Audit/refresh
+        [HttpPut("/refresh")]
+        public async Task<JsonResult> Refresh()
+        {
+            Startup.StaticConfig = Startup.AppConfiguration(Startup.StaticConfig);
+            return new JsonResult(true);
+        }
         // GET: Audit/id
         [HttpGet("{id}")]
         public async Task<JsonResult> GetbyId(string id)
@@ -41,7 +48,7 @@ namespace Audit.Controllers
             return new JsonResult(await _repository.Create(value).ConfigureAwait(true));
         }
 
-        // POST: Audit/id
+        // PUT: Audit/id
         [HttpPut]
         public async Task<JsonResult> Put([FromBody] Entity.Audit value)
         {

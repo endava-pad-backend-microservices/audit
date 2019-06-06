@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using Audit.Utils;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Rewrite;
@@ -23,19 +24,20 @@ namespace Audit
             StaticConfig = Configuration;
         }
 
-        public static IConfiguration StaticConfig { get; private set; }
+        public static IConfiguration StaticConfig { get; set; }
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services) 
+        public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);                 
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.Configure<Utils.EnvironmentConfig>(Configuration);
-            if (Configuration["EUREKA_URL"] != null && Configuration["SERVER_URL"] != null)
+            if (Configuration[Constants.eurekaUrl] != null && Configuration[Constants.serverUrl] != null)
             {
-                Configuration["eureka:client:serviceUrl"] = Configuration["EUREKA_URL"];
-                Configuration["eureka:instance:hostName"] = Configuration["SERVER_URL"];
+                Configuration[Constants.eurekaServiceUrl] = Configuration[Constants.eurekaUrl];
+                Configuration[Constants.eurekaServiceHostName] = Configuration[Constants.serverUrl];
             }
+            StaticConfig = AppConfiguration(StaticConfig);
             services.AddDiscoveryClient(Configuration);
             // Register the Swagger generator, defining 1 Swagger documents
             services.AddSwaggerGen(c =>
@@ -99,10 +101,47 @@ namespace Audit
             var isUp = false;
             while (!isUp)
             {
+                System.Threading.Thread.Sleep(10000);
                 isUp = repo.IsUp().Result;
             }
             repo.CreateDd();
 
+        }
+
+        static public IConfiguration AppConfiguration(IConfiguration Configuration)
+        {
+            var attributeToNotSave = new List<string>();
+            var my_conf = new Services.ConfigService().Get().Result;
+            while (my_conf.Count == 0)
+            {
+                System.Threading.Thread.Sleep(10000);
+                my_conf = new Services.ConfigService().Get().Result;
+            }
+            for (int i = 0; i < my_conf.Count; i++)
+            {
+                if (my_conf.ContainsKey(Constants.auditNotSave+":" + i))
+                {
+                    attributeToNotSave.Add(my_conf[Constants.auditNotSave + ":" + i]);
+                    my_conf.Remove(Constants.auditNotSave + ":" + i);
+                }
+                else
+                {
+                    break;
+                }
+            }
+            if (attributeToNotSave.Count > 0)
+            {
+                Configuration[Constants.auditNotSave] = string.Join(',', attributeToNotSave);
+            }
+            else
+            {
+                Configuration[Constants.auditNotSave] = "";
+            }
+            foreach (var con in my_conf)
+            {
+                Configuration[con.Key] = con.Value;
+            }
+            return Configuration;
         }
     }
 }

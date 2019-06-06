@@ -1,5 +1,6 @@
 FROM mcr.microsoft.com/dotnet/core/aspnet:2.2-stretch-slim AS base
 ENV COUCHDB_URL=localhost \
+GATEWAY_URL=localhost:8080 \
 EUREKA_URL=localhost:8761/eureka \
 SERVER_URL=localhost \
 COUCHDB_USER=admin \
@@ -7,7 +8,8 @@ COUCHDB_PASSWORD=123456 \
 COUCHDB_PORT=5986 \
 DOCKERIZE_VERSION=v0.6.0 \
 ASPNETCORE_URLS=http://+:8087 \
-SWAGGER_PATH=/
+SWAGGER_PATH=/ \
+ENVIRONMENT=dev
 
 WORKDIR /app
 FROM mcr.microsoft.com/dotnet/core/sdk:2.2-stretch AS build
