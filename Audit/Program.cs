@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace Audit
 {
@@ -8,7 +9,12 @@ namespace Audit
     {
         public static void Main(string[] args)
         {
-            CreateWebHostBuilder(args).Build().Run();
+            CreateWebHostBuilder(args).ConfigureLogging((hostingContext,logging)=> {
+                logging.ClearProviders();
+                logging.AddConsole();
+                logging.AddDebug();
+                logging.AddEventSourceLogger();
+            }).Build().Run();
         }
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
