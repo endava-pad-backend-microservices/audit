@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Audit.Utils;
 using CouchDB.Driver;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RestSharp;
 
@@ -14,9 +15,11 @@ namespace Audit.Repository
         private CouchClient ConnectionDB { get; set; }
 
         readonly private EnvironmentConfig _configuration;
+        readonly private ILogger _logger;
 
-        public AuditRepository(IOptions<EnvironmentConfig> configuration)
+        public AuditRepository(IOptions<EnvironmentConfig> configuration,ILogger logger)
         {
+            _logger = logger;
             _configuration = configuration.Value;
             if (_configuration.COUCHDB_URL != null)
             {
@@ -29,6 +32,7 @@ namespace Audit.Repository
                 this.ConnectionDB = new CouchClient("http://" + Startup.StaticConfig["DBconnection:url"] + ":" + Startup.StaticConfig["DBconnection:port"],
                   s => s.UseBasicAuthentication(Startup.StaticConfig["DBconnection:user"], Startup.StaticConfig["DBconnection:password"]));
             }
+            _logger.LogInformation(String.Format("DB at: {0}.",this.ConnectionDB.ConnectionString));
         }
         public async Task<List<Entity.Audit>> FindAll()
         {
@@ -76,9 +80,11 @@ namespace Audit.Repository
             try
             {
                 await ConnectionDB.CreateDatabaseAsync<Entity.Audit>().ConfigureAwait(true);
+                _logger.LogInformation("Creating Audit table.");
                 return true;
             }catch
             {
+                _logger.LogWarning("Audit Table is already created.");
                 return false;
             }
         }
@@ -94,6 +100,7 @@ namespace Audit.Repository
                 return false;
             }catch
             {
+                _logger.LogWarning("Fail to connect to DB.");
                 return false;
             }
         }

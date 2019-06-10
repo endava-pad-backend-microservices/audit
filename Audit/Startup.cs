@@ -9,12 +9,13 @@ using Microsoft.Extensions.Options;
 using Steeltoe.Discovery.Client;
 using Swashbuckle.AspNetCore.Swagger;
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 
 namespace Audit
 {
     public class Startup
     {
-        public Startup(IHostingEnvironment env)
+        public Startup(IHostingEnvironment env,ILogger<Startup> logger)
         {
             var builder = new ConfigurationBuilder().SetBasePath(env.ContentRootPath).
                 AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
@@ -22,8 +23,9 @@ namespace Audit
                 .AddEnvironmentVariables();
             Configuration = builder.Build();
             StaticConfig = Configuration;
+            _logger = logger;
         }
-
+        private static ILogger _logger { get; set; }
         public static IConfiguration StaticConfig { get; set; }
         public IConfiguration Configuration { get; }
 
@@ -97,10 +99,11 @@ namespace Audit
 
             app.UseMvc();
 
-            var repo = new Audit.Repository.AuditRepository(envConfig);
+            var repo = new Audit.Repository.AuditRepository(envConfig,_logger);
             var isUp = false;
             while (!isUp)
             {
+                _logger.LogInformation("Checking for DB");
                 System.Threading.Thread.Sleep(10000);
                 isUp = repo.IsUp().Result;
             }
@@ -112,8 +115,10 @@ namespace Audit
         {
             var attributeToNotSave = new List<string>();
             var my_conf = new Services.ConfigService().Get().Result;
+            _logger.LogInformation("Getting Configuration..");
             while (my_conf.Count == 0)
             {
+                _logger.LogWarning("Fail to get Configuration. Re-attenting..");
                 System.Threading.Thread.Sleep(10000);
                 my_conf = new Services.ConfigService().Get().Result;
             }
