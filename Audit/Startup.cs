@@ -99,16 +99,7 @@ namespace Audit
 
             app.UseMvc();
 
-            var repo = new Audit.Repository.AuditRepository(envConfig,_logger);
-            var isUp = false;
-            while (!isUp)
-            {
-                _logger.LogInformation("Checking for DB");
-                System.Threading.Thread.Sleep(10000);
-                isUp = repo.IsUp().Result;
-            }
-            repo.CreateDd();
-
+            new Repository.Repository(envConfig.Value,_logger).InitializateDb();
         }
 
         static public IConfiguration AppConfiguration(IConfiguration Configuration)
@@ -118,9 +109,8 @@ namespace Audit
             _logger.LogInformation("Getting Configuration..");
             while (my_conf.Count == 0)
             {
-                _logger.LogWarning("Fail to get Configuration. Re-attenting..");
-                System.Threading.Thread.Sleep(10000);
-                my_conf = new Services.ConfigService().Get().Result;
+                _logger.LogWarning("Could not get configuration. Continuing with out it!");
+                return Configuration;
             }
             for (int i = 0; i < my_conf.Count; i++)
             {

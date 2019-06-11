@@ -21,45 +21,79 @@ namespace Audit.Controllers
         public AuditController(IOptions<EnvironmentConfig> configuration, ILogger<AuditController> logger)
         {
             _logger = logger;
-            _repository = new Repository.AuditRepository(configuration,_logger);
+            _repository = new Repository.AuditRepository(configuration, _logger);
         }
 
         // GET: Audit
         [HttpGet]
         public async Task<JsonResult> Get()
         {
-            _logger.LogInformation("audit/get");
-            return new JsonResult(await _repository.FindAll().ConfigureAwait(true));
+            try
+            {
+                return new JsonResult(await _repository.FindAll().ConfigureAwait(true));
+            }
+            catch (Exception e)
+            {
+                return new JsonResult(e.Message);
+            }
         }
         // GET: Audit/id
         [HttpGet("{id}")]
         public async Task<JsonResult> GetbyId(string id)
         {
-            return new JsonResult(await _repository.FindById(id,true).ConfigureAwait(true));
+            try
+            {
+                return new JsonResult(await _repository.FindById(id, true).ConfigureAwait(true));
+            }
+            catch (Exception e)
+            {
+                return new JsonResult(e.Message);
+            }
         }
 
         // POST: Audit
         [HttpPost]
         public async Task<JsonResult> Post([FromBody] Entity.Audit value)
         {
-            return new JsonResult(await _repository.Create(value).ConfigureAwait(true));
+            try
+            {
+                return new JsonResult(await _repository.Create(value).ConfigureAwait(true));
+            }
+            catch (Exception e)
+            {
+                return new JsonResult(e.Message);
+            }
         }
 
         // PUT: Audit/id
         [HttpPut]
         public async Task<JsonResult> Put([FromBody] Entity.Audit value)
         {
-            return new JsonResult(await _repository.Update(value).ConfigureAwait(true));
+            try
+            {
+                return new JsonResult(await _repository.Update(value).ConfigureAwait(true));
+            }
+            catch (Exception e)
+            {
+                return new JsonResult(e.Message);
+            }
         }
 
         // DELETE: Audit/5
         [HttpDelete("{id}")]
         public async Task<bool> Delete(string id)
         {
-            _logger.LogInformation(String.Format("Deleting: {0}",id));
-            var doc = await _repository.FindById(id,false).ConfigureAwait(true);
-            var result = await _repository.Delete(doc).ConfigureAwait(true);
-            return result;
+            try
+            {
+                _logger.LogInformation(String.Format("Deleting: {0}", id));
+                var doc = await _repository.FindById(id, false).ConfigureAwait(true);
+                var result = await _repository.Delete(doc).ConfigureAwait(true);
+                return result;
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
         }
     }
 }
