@@ -9,7 +9,7 @@ namespace Audit.Services
 {
     public class ConfigService : IService
     {
-        readonly private RestClient client = new RestClient("http://" + Startup.StaticConfig[Constants.gatewayUrl]);
+        readonly private RestClient client = new RestClient("http://" + Startup.StaticConfig[Constants.configUrl]);
         public async Task<Dictionary<string, string>> Get()
         {
             string endpoint = Constants.configEndpoint + Startup.StaticConfig[Constants.environment] + "-" + Startup.StaticConfig[Constants.environment] + ".json";
