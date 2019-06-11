@@ -34,6 +34,7 @@ namespace Audit.Controllers
             }
             catch (Exception e)
             {
+                _logger.LogWarning(e.Message);
                 return new JsonResult(e.Message);
             }
         }
@@ -47,6 +48,7 @@ namespace Audit.Controllers
             }
             catch (Exception e)
             {
+                _logger.LogWarning(e.Message);
                 return new JsonResult(e.Message);
             }
         }
@@ -61,6 +63,7 @@ namespace Audit.Controllers
             }
             catch (Exception e)
             {
+                _logger.LogWarning(e.Message);
                 return new JsonResult(e.Message);
             }
         }
@@ -75,6 +78,7 @@ namespace Audit.Controllers
             }
             catch (Exception e)
             {
+                _logger.LogWarning(e.Message);
                 return new JsonResult(e.Message);
             }
         }
@@ -92,7 +96,7 @@ namespace Audit.Controllers
             }
             catch (Exception e)
             {
-                _logger.LogWarning(String.Format("Fail to delete. Id: {0}", id));
+                _logger.LogWarning(e.Message);
                 return false;
             }
         }
