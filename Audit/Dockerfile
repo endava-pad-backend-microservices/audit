@@ -2,6 +2,7 @@ FROM mcr.microsoft.com/dotnet/core/aspnet:2.2-stretch-slim AS base
 ENV COUCHDB_URL=localhost \
 GATEWAY_URL=localhost:8080 \
 EUREKA_URL=localhost:8761/eureka \
+CONFIG_URL=localhost:8086 \
 SERVER_URL=localhost \
 COUCHDB_USER=admin \
 COUCHDB_PASSWORD=123456 \

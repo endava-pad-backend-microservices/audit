@@ -92,6 +92,7 @@ namespace Audit.Controllers
             }
             catch (Exception e)
             {
+                _logger.LogWarning(String.Format("Fail to delete. Id: {0}", id));
                 return false;
             }
         }

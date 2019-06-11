@@ -109,8 +109,9 @@ namespace Audit
             _logger.LogInformation("Getting Configuration..");
             while (my_conf.Count == 0)
             {
-                _logger.LogWarning("Could not get configuration. Continuing with out it!");
-                return Configuration;
+                System.Threading.Thread.Sleep(10000);
+                _logger.LogWarning("Could not get configuration. Re-attempting!");
+                my_conf = new Services.ConfigService().Get().Result;
             }
             for (int i = 0; i < my_conf.Count; i++)
             {
