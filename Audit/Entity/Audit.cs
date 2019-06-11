@@ -27,15 +27,20 @@ namespace Audit.Entity
             try
             {
                 jObject = SimpleJson.DeserializeObject<JsonObject>(jString.ToLowerInvariant());
-            }catch
+            }
+            catch
             {
                 return jString;
             }
-            var notToSave = Startup.StaticConfig[Constants.auditNotSave].Split(",");
-            foreach (var token in notToSave)
+            if (Startup.StaticConfig[Constants.auditNotSave] != null)
             {
-                if (jObject.ContainsKey(token)){
-                    jObject[token] = "";
+                var notToSave = Startup.StaticConfig[Constants.auditNotSave].Split(",");
+                foreach (var token in notToSave)
+                {
+                    if (jObject.ContainsKey(token))
+                    {
+                        jObject[token] = "";
+                    }
                 }
             }
             return SimpleJson.SerializeObject(jObject);
