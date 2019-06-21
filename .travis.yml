@@ -1,0 +1,16 @@
+language: csharp
+
+mono: none
+dotnet: 2.1.502
+script:
+  - dotnet restore
+
+#services:
+#  - docker
+
+cache:
+  directories:
+    - $HOME/.m2
+
+before_script:
+  - export CODACY_PROJECT_TOKEN=0cb79df439ec4a08b0427f452f218f68
