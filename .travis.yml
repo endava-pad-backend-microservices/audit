@@ -4,8 +4,11 @@ mono: none
 
 dotnet: 2.2
 
-script:
+install:
   - dotnet restore
+  
+script:
+  - dotnet build
 
 #services:
 #  - docker
